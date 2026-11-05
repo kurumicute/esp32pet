@@ -1,0 +1,635 @@
+{
+  "pet": {
+    "vaporeon": {
+      "idle/idle_0": {
+        "head_top": [
+          32,
+          17
+        ],
+        "eyes": [
+          32,
+          30
+        ],
+        "neck": [
+          32,
+          41
+        ],
+        "eyes_open": true
+      },
+      "idle/idle_1": {
+        "head_top": [
+          32,
+          17
+        ],
+        "eyes": [
+          32,
+          30
+        ],
+        "neck": [
+          32,
+          41
+        ],
+        "eyes_open": true
+      },
+      "blink/blink_0": {
+        "head_top": [
+          32,
+          17
+        ],
+        "eyes": [
+          32,
+          30
+        ],
+        "neck": [
+          32,
+          41
+        ],
+        "eyes_open": false
+      },
+      "happy/happy_0": {
+        "head_top": [
+          32,
+          17
+        ],
+        "eyes": [
+          32,
+          30
+        ],
+        "neck": [
+          32,
+          41
+        ],
+        "eyes_open": false
+      },
+      "happy/happy_1": {
+        "head_top": [
+          32,
+          16
+        ],
+        "eyes": [
+          32,
+          29
+        ],
+        "neck": [
+          32,
+          40
+        ],
+        "eyes_open": false
+      },
+      "sleep/sleep_0": {
+        "head_top": [
+          32,
+          23
+        ],
+        "eyes": [
+          32,
+          36
+        ],
+        "neck": [
+          32,
+          47
+        ],
+        "eyes_open": false
+      },
+      "sleep/sleep_1": {
+        "head_top": [
+          32,
+          24
+        ],
+        "eyes": [
+          32,
+          37
+        ],
+        "neck": [
+          32,
+          48
+        ],
+        "eyes_open": false
+      },
+      "wake/wake_0": {
+        "head_top": [
+          32,
+          21
+        ],
+        "eyes": [
+          32,
+          34
+        ],
+        "neck": [
+          32,
+          45
+        ],
+        "eyes_open": false
+      },
+      "wake/wake_1": {
+        "head_top": [
+          32,
+          15
+        ],
+        "eyes": [
+          32,
+          28
+        ],
+        "neck": [
+          32,
+          39
+        ],
+        "eyes_open": false
+      },
+      "wake/wake_2": {
+        "head_top": [
+          32,
+          17
+        ],
+        "eyes": [
+          32,
+          30
+        ],
+        "neck": [
+          32,
+          41
+        ],
+        "eyes_open": true
+      },
+      "look/look_left": {
+        "head_top": [
+          32,
+          17
+        ],
+        "eyes": [
+          32,
+          30
+        ],
+        "neck": [
+          32,
+          41
+        ],
+        "eyes_open": true
+      },
+      "look/look_right": {
+        "head_top": [
+          32,
+          17
+        ],
+        "eyes": [
+          32,
+          30
+        ],
+        "neck": [
+          32,
+          41
+        ],
+        "eyes_open": true
+      }
+    },
+    "chandelure": {
+      "idle/idle_0": {
+        "head_top": [
+          32,
+          20
+        ],
+        "eyes": [
+          32,
+          31
+        ],
+        "neck": [
+          32,
+          40
+        ],
+        "eyes_open": true
+      },
+      "idle/idle_1": {
+        "head_top": [
+          32,
+          20
+        ],
+        "eyes": [
+          32,
+          31
+        ],
+        "neck": [
+          32,
+          40
+        ],
+        "eyes_open": true
+      },
+      "blink/blink_0": {
+        "head_top": [
+          32,
+          20
+        ],
+        "eyes": [
+          32,
+          31
+        ],
+        "neck": [
+          32,
+          40
+        ],
+        "eyes_open": false
+      },
+      "happy/happy_0": {
+        "head_top": [
+          32,
+          20
+        ],
+        "eyes": [
+          32,
+          31
+        ],
+        "neck": [
+          32,
+          40
+        ],
+        "eyes_open": false
+      },
+      "happy/happy_1": {
+        "head_top": [
+          32,
+          19
+        ],
+        "eyes": [
+          32,
+          30
+        ],
+        "neck": [
+          32,
+          39
+        ],
+        "eyes_open": false
+      },
+      "sleep/sleep_0": {
+        "head_top": [
+          32,
+          26
+        ],
+        "eyes": [
+          32,
+          37
+        ],
+        "neck": [
+          32,
+          46
+        ],
+        "eyes_open": false
+      },
+      "sleep/sleep_1": {
+        "head_top": [
+          32,
+          27
+        ],
+        "eyes": [
+          32,
+          38
+        ],
+        "neck": [
+          32,
+          47
+        ],
+        "eyes_open": false
+      },
+      "wake/wake_0": {
+        "head_top": [
+          32,
+          24
+        ],
+        "eyes": [
+          32,
+          35
+        ],
+        "neck": [
+          32,
+          44
+        ],
+        "eyes_open": false
+      },
+      "wake/wake_1": {
+        "head_top": [
+          32,
+          18
+        ],
+        "eyes": [
+          32,
+          29
+        ],
+        "neck": [
+          32,
+          38
+        ],
+        "eyes_open": false
+      },
+      "wake/wake_2": {
+        "head_top": [
+          32,
+          20
+        ],
+        "eyes": [
+          32,
+          31
+        ],
+        "neck": [
+          32,
+          40
+        ],
+        "eyes_open": true
+      },
+      "look/look_left": {
+        "head_top": [
+          32,
+          20
+        ],
+        "eyes": [
+          32,
+          31
+        ],
+        "neck": [
+          32,
+          40
+        ],
+        "eyes_open": true
+      },
+      "look/look_right": {
+        "head_top": [
+          32,
+          20
+        ],
+        "eyes": [
+          32,
+          31
+        ],
+        "neck": [
+          32,
+          40
+        ],
+        "eyes_open": true
+      }
+    },
+    "darkrai": {
+      "idle/idle_0": {
+        "head_top": [
+          32,
+          15
+        ],
+        "eyes": [
+          32,
+          23
+        ],
+        "neck": [
+          32,
+          29
+        ],
+        "eyes_open": true
+      },
+      "idle/idle_1": {
+        "head_top": [
+          32,
+          15
+        ],
+        "eyes": [
+          32,
+          23
+        ],
+        "neck": [
+          32,
+          29
+        ],
+        "eyes_open": true
+      },
+      "blink/blink_0": {
+        "head_top": [
+          32,
+          15
+        ],
+        "eyes": [
+          32,
+          23
+        ],
+        "neck": [
+          32,
+          29
+        ],
+        "eyes_open": false
+      },
+      "happy/happy_0": {
+        "head_top": [
+          32,
+          15
+        ],
+        "eyes": [
+          32,
+          23
+        ],
+        "neck": [
+          32,
+          29
+        ],
+        "eyes_open": false
+      },
+      "happy/happy_1": {
+        "head_top": [
+          32,
+          14
+        ],
+        "eyes": [
+          32,
+          22
+        ],
+        "neck": [
+          32,
+          28
+        ],
+        "eyes_open": false
+      },
+      "sleep/sleep_0": {
+        "head_top": [
+          32,
+          21
+        ],
+        "eyes": [
+          32,
+          29
+        ],
+        "neck": [
+          32,
+          35
+        ],
+        "eyes_open": false
+      },
+      "sleep/sleep_1": {
+        "head_top": [
+          32,
+          22
+        ],
+        "eyes": [
+          32,
+          30
+        ],
+        "neck": [
+          32,
+          36
+        ],
+        "eyes_open": false
+      },
+      "wake/wake_0": {
+        "head_top": [
+          32,
+          19
+        ],
+        "eyes": [
+          32,
+          27
+        ],
+        "neck": [
+          32,
+          33
+        ],
+        "eyes_open": false
+      },
+      "wake/wake_1": {
+        "head_top": [
+          32,
+          13
+        ],
+        "eyes": [
+          32,
+          21
+        ],
+        "neck": [
+          32,
+          27
+        ],
+        "eyes_open": false
+      },
+      "wake/wake_2": {
+        "head_top": [
+          32,
+          15
+        ],
+        "eyes": [
+          32,
+          23
+        ],
+        "neck": [
+          32,
+          29
+        ],
+        "eyes_open": true
+      },
+      "look/look_left": {
+        "head_top": [
+          32,
+          15
+        ],
+        "eyes": [
+          32,
+          23
+        ],
+        "neck": [
+          32,
+          29
+        ],
+        "eyes_open": true
+      },
+      "look/look_right": {
+        "head_top": [
+          32,
+          15
+        ],
+        "eyes": [
+          32,
+          23
+        ],
+        "neck": [
+          32,
+          29
+        ],
+        "eyes_open": true
+      }
+    }
+  },
+  "accessories": {
+    "bow/bow": {
+      "anchor": "head_top",
+      "pivot": [
+        7,
+        7
+      ],
+      "dx": 9,
+      "dy": 4
+    },
+    "crown/crown": {
+      "anchor": "head_top",
+      "pivot": [
+        8,
+        10
+      ],
+      "dx": 0,
+      "dy": 2
+    },
+    "glasses/glasses": {
+      "anchor": "eyes",
+      "pivot": [
+        12,
+        5
+      ],
+      "dx": 0,
+      "dy": 0
+    },
+    "leaf_hat/leaf_hat": {
+      "anchor": "head_top",
+      "pivot": [
+        10,
+        12
+      ],
+      "dx": 0,
+      "dy": 3
+    },
+    "santa_hat/santa_hat": {
+      "anchor": "head_top",
+      "pivot": [
+        11,
+        16
+      ],
+      "dx": 0,
+      "dy": 3
+    },
+    "sleep_hat/sleep_hat": {
+      "anchor": "head_top",
+      "pivot": [
+        11,
+        16
+      ],
+      "dx": 0,
+      "dy": 3
+    },
+    "star_eyes/star_eyes": {
+      "anchor": "eyes",
+      "pivot": [
+        9,
+        3
+      ],
+      "dx": 0,
+      "dy": 0,
+      "eyes_open_only": true
+    },
+    "cape/cape_back": {
+      "anchor": "neck",
+      "pivot": [
+        27,
+        0
+      ],
+      "dx": 0,
+      "dy": -1,
+      "layer": "back"
+    },
+    "cape/cape_front": {
+      "anchor": "neck",
+      "pivot": [
+        2,
+        1
+      ],
+      "dx": 0,
+      "dy": 2
+    }
+  }
+}

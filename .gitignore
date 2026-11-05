@@ -1,0 +1,4 @@
+build/
+sdcard/
+__pycache__/
+*.pyc
