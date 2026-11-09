@@ -115,7 +115,6 @@ void SerialConsole::handleLine(char *line, uint32_t now) {
                    "  backup      save settings to SD card\n"
                    "  restore     load settings from SD card\n"
                    "  ap          open the Wi-Fi setup hotspot now\n"
-                   "  ble clear   remove iPhone pairing\n"
                    "  cwakey      set CWA weather API key (empty = clear)\n"
                    "  county [n]  list counties / set weather county\n"
                    "  weather     show weather state\n"
@@ -129,8 +128,6 @@ void SerialConsole::handleLine(char *line, uint32_t now) {
                    "  song 0~3    play music box song\n"
                    "  rhythm      start the rhythm game\n"
                    "  alarm test  ring the alarm now");
-  } else if (strcmp(line, "ble clear") == 0) {
-    if (bleClear_) bleClear_();
   } else if (strcmp(line, "ap") == 0) {
     if (wifi_->apActive()) {
       Serial.printf("hotspot already on: %s\n", wifi_->apSsid());

@@ -6,7 +6,7 @@
 enum PetFrameId : uint8_t {
   PF_idle_0, PF_idle_1, PF_blink_0, PF_happy_0, PF_happy_1, PF_sleep_0, PF_sleep_1, PF_wake_0, PF_wake_1, PF_wake_2, PF_look_left, PF_look_right, PF_COUNT
 };
-constexpr uint8_t PET_CHAR_COUNT = 3;
+constexpr uint8_t PET_CHAR_COUNT = 1;
 extern const PetFrameAsset *const PET_FRAMES[PET_CHAR_COUNT][PF_COUNT];
 extern const char *const PET_CHAR_IDS[PET_CHAR_COUNT];  // 資料夾名稱 (SD 卡音效資料夾也用這個)
 

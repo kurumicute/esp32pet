@@ -185,14 +185,12 @@ void handleRoot() {
   // ---- 狀態 ----
   char timeBuf[32];
   if (!gApp->timeString(timeBuf, sizeof(timeBuf))) strcpy(timeBuf, "尚未同步");
-  static const char *const PHONE_STATE[] = {"關閉", "等待 iPhone 連線", "配對中", "已連線（讀取通知中）", "已連線"};
-  const uint8_t ps = (uint8_t)gApp->phoneState();
   const WeatherInfo w = gApp->weather();
   cardStart("📋 狀態");
   sendf("<div class=kv><b>時間</b><span>%s</span><b>電池</b><span><span class=bar><i style='width:%u%%'></i></span>"
-        "%u%%（%.2fV）%s</span><b>iPhone</b><span>%s</span><b>IP</b><span>%s</span>",
+        "%u%%（%.2fV）%s</span><b>IP</b><span>%s</span>",
         timeBuf, bat.percent(), bat.percent(), bat.voltage(), bat.charging() ? " ⚡充電中" : "",
-        PHONE_STATE[ps < 5 ? ps : 0], WiFi.localIP().toString().c_str());
+        WiFi.localIP().toString().c_str());
   if (w.valid) {
     sendf("<b>天氣</b><span>%s %d~%d°C，降雨 %u%%</span>",
           Str::WEATHER_NAMES[(uint8_t)w.kind < 8 ? (uint8_t)w.kind : 0], w.minT, w.maxT, w.pop);
@@ -273,13 +271,6 @@ void handleRoot() {
   numRow("break", "休息", 1, 30, 1, s.breakMin, "分");
   cardEnd();
 
-  // ---- iPhone 通知 ----
-  cardStart("📱 iPhone 通知");
-  toggleRow("notify", "顯示 iPhone 通知", s.notifyOn, "藍牙，iPhone 不用裝 App");
-  toggleRow("notifyDtl", "顯示通知內容", s.notifyDetail, "關閉 = 只顯示 App 名稱");
-  server.sendContent("<div class=row><small>配對：iPhone「設定 → 藍牙」點 DeskPet，輸入板子螢幕上的 6 位數配對碼，"
-                     "並允許分享通知。</small></div>");
-  cardEnd();
 
   // ---- 天氣 ----
   cardStart("☀️ 天氣（中央氣象署）");
@@ -328,11 +319,6 @@ void handleRoot() {
   }
   cardEnd();
 
-  cardStart("⚙️ 其他");
-  server.sendContent("<div class=row style='border:0'>");
-  actionButton("/unpair", "取消 iPhone 配對", "bad", "確定要取消 iPhone 配對？");
-  server.sendContent("</div>");
-  cardEnd();
   server.sendContent("<p class=note>⚠️ 此頁面沒有密碼保護，同一網路的人都能修改設定。</p></html>");
   server.sendContent("");  // 結束 chunked 傳輸
 }
@@ -414,8 +400,6 @@ void handleSave() {
   n.alarmOn = server.hasArg("alarmOn");
   if (!parseNum("pwrSave", 0, 2, v)) return badRequest("省電模式不正確");
   n.powerSave = (uint8_t)v;
-  n.notifyOn = server.hasArg("notify");
-  n.notifyDetail = server.hasArg("notifyDtl");
   n.weatherFx = server.hasArg("wxFx");
   n.tempMood = server.hasArg("tempMood");
   n.hourlyFx = server.hasArg("hourly");
@@ -786,7 +770,7 @@ void handleUploadData() {
       const String s = server.arg("sub");
       if (!validSoundSub(s)) return upFail("音效資料夾不正確");
       String stem = lower.substring(0, lower.length() - 4);
-      if (!SoundManager::isSfxName(stem.c_str())) return upFail("音效檔名要是 cry、cry_happy、alarm… 這類名稱");
+      if (!SoundManager::isSfxName(stem.c_str())) return upFail("音效檔名要是 cry、cry_happy、alarm、pat_1… 這類名稱");
       snprintf(sub, sizeof(sub), "/%s", s.c_str());
       name = lower;
     }
@@ -843,7 +827,7 @@ void handleUploadPage() {
           "onsubmit=\"var s=this.querySelector('select');if(s)this.action='/upload?dir=%s&sub='+s.value\">",
           k.dir, k.dir);
     if (strcmp(k.dir, "sound") == 0) {
-      server.sendContent("<label class=row><span>給誰用<small>檔名要是 cry.wav、alarm.wav… 這類名稱</small></span>"
+      server.sendContent("<label class=row><span>給誰用<small>檔名要是 cry.wav、alarm.wav、pat_1.wav… 這類名稱</small></span>"
                          "<select><option value=common>全部角色共用</option>");
       for (uint8_t i = 0; i < Characters::count(); i++) {
         char esc[96];
@@ -911,7 +895,7 @@ void handleWifiPage() {
   server.send(200, "text/html; charset=utf-8", "");
   sendPageHead();
   server.sendContent("<title>DeskPet Wi-Fi</title><h1>📶 <span>Wi-Fi 設定</span></h1>"
-                     "<p class=sub>讓水伊布桌寵連上你家的網路</p><form method=post action=/wifi><div class=card><h2>選擇網路</h2>");
+                     "<p class=sub>讓桌寵連上你家的網路</p><form method=post action=/wifi><div class=card><h2>選擇網路</h2>");
 
   const int n = WiFi.scanComplete();
   if (n > 0) {
@@ -971,12 +955,6 @@ void WebPanel::begin(App &app) {
   server.on("/save", HTTP_POST, handleSave);
   server.on("/pet", HTTP_POST, handlePet);
   server.on("/walk", HTTP_POST, handleWalk);
-  server.on("/unpair", HTTP_POST, []() {
-    gApp->webUnpairPhone();
-    securityHeaders();
-    server.sendHeader("Location", "/");
-    server.send(303, "text/plain", "");
-  });
   server.on("/history", HTTP_GET, handleHistory);
   server.on("/history.csv", HTTP_GET, handleHistoryCsv);
   server.on("/stats", HTTP_GET, handleStats);

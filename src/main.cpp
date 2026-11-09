@@ -1,4 +1,4 @@
-// 水伊布風格桌面時鐘寵物 — 進入點
+// 桌面時鐘寵物 (DeskPet) — 進入點
 // 板子：Waveshare ESP32-S3-LCD-1.54 (ST7789 240x240)
 #include <Arduino.h>
 

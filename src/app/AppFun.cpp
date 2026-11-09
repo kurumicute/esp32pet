@@ -315,14 +315,19 @@ void App::rhythmButton(const ButtonEvent &e, uint32_t now) {
 // 音樂盒：左 / 右 = 換曲，中 = 播放 / 停止，長按 = 返回
 void App::drawMusic() {
   char buf[48];
-  snprintf(buf, sizeof(buf), "%u / %u", (unsigned)(musicSong_ + 1), (unsigned)SoundManager::songCount());
+  snprintf(buf, sizeof(buf), "%u / %u", (unsigned)(SoundManager::songCount() ? musicSong_ + 1 : 0),
+           (unsigned)SoundManager::songCount());
   drawHeader(Str::MUSIC_TITLE, buf);
   display_.gfx().fillRect(0, 34, 240, 26, Theme::BG);
   display_.utf8Centered(38, musicPlaying_ ? Str::MUSIC_PLAYING : Str::MUSIC_IDLE, 1,
                         musicPlaying_ ? Theme::ACCENT : Theme::DIM, Theme::BG);
   const uint16_t c = drawCard(24, NAME_Y, 192, 26, true);
-  snprintf(buf, sizeof(buf), "‹ %s ›", SoundManager::songName(musicSong_ < SoundManager::songCount() ? musicSong_ : 0));
-  display_.utf8Centered(NAME_Y, buf, 2, Theme::TIME, c, 184);
+  if (SoundManager::songCount() == 0) {
+    display_.utf8Centered(NAME_Y + 7, Str::MUSIC_EMPTY, 1, Theme::DIM, c, 184);
+  } else {
+    snprintf(buf, sizeof(buf), "‹ %s ›", SoundManager::songName(musicSong_ < SoundManager::songCount() ? musicSong_ : 0));
+    display_.utf8Centered(NAME_Y, buf, 2, Theme::TIME, c, 184);
+  }
   drawKeyHints(Str::KEY_PREV_SONG, Str::KEY_PLAY, Str::KEY_NEXT_SONG, HINTBAR_Y);
 }
 
@@ -345,6 +350,8 @@ void App::musicButton(const ButtonEvent &e, uint32_t now) {
     enter(Screen::Main, now);
     return;
   }
+  if (n == 0) return;  // 沒有歌曲 (SD 卡 music/ 是空的)
+  if (musicSong_ >= n) musicSong_ = 0;
   if (e.btn == Btn::Pwr) {
     musicPlaying_ = !musicPlaying_;
     if (musicPlaying_) {

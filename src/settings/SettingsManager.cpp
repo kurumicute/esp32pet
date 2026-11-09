@@ -71,8 +71,6 @@ void SettingsManager::load() {
   cur_.alarmMin = prefs.getUChar("alM", cur_.alarmMin);
   cur_.alarmDays = prefs.getUChar("alD", cur_.alarmDays);
   cur_.powerSave = prefs.getUChar("pwrSave", cur_.powerSave);
-  cur_.notifyOn = prefs.getBool("notify", cur_.notifyOn);
-  cur_.notifyDetail = prefs.getBool("notifyDtl", cur_.notifyDetail);
   prefs.getString("cwaKey", cur_.cwaKey, sizeof(cur_.cwaKey));
   prefs.end();
   sanitize(cur_);
@@ -113,8 +111,6 @@ void SettingsManager::save() {
   SAVE_U8("alM", alarmMin);
   SAVE_U8("alD", alarmDays);
   SAVE_U8("pwrSave", powerSave);
-  SAVE_BOOL("notify", notifyOn);
-  SAVE_BOOL("notifyDtl", notifyDetail);
 #undef SAVE_U8
 #undef SAVE_BOOL
   if (strcmp(cur_.ssid, saved_.ssid) != 0) prefs.putString("ssid", cur_.ssid);

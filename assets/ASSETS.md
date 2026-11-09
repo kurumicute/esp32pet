@@ -23,8 +23,8 @@
 
 ## 寵物影格 `pets/<角色>/`
 
-目前有三個角色資料夾：`vaporeon`（水伊布）、`chandelure`（水晶燈火靈）、`darkrai`（達克萊伊），每個資料夾都要有下表**全部**影格。
-新增角色：在 `tools/gen_draft_art.py` 的 `CHARACTERS` 與 `tools/png2c.py` 的 `CHARACTERS` 加在最後面，並在 `src/ui/Strings.h` 的 `Str::CHARACTER_NAMES` 加名稱（數量不一致會編譯失敗）。anchors.json 的 `pet` 也是依角色分組：`"pet": {"chandelure": {"idle/idle_0": {...}}}`。
+目前只有一個內建角色資料夾：`ayame`（百鬼綾目），由 `tools/gen_draft_art.py` 把 `example7.png` 用貼圖流程（同 `tools/sdcard.py sticker`）產生，12 格都是同一張圖（睡覺往下沉 1 px），`png2c.py` 會把相同影格合併成一份。每個資料夾都要有下表**全部**影格。
+新增內建角色：在 `tools/gen_draft_art.py` 的 `CHARACTERS` 與 `tools/png2c.py` 的 `CHARACTERS` 加在最後面，在 `src/pet/Characters.cpp` 的 `BUILTIN_VOICE` 指定叫聲組，並在 `src/ui/Strings.h` 的 `Str::CHARACTER_NAMES` 加名稱（數量不一致會編譯失敗）。anchors.json 的 `pet` 也是依角色分組：`"pet": {"ayame": {"idle/idle_0": {...}}}`。
 
 - 每張 **64 x 64**，每一張影格中的角色比例、位置要一致（只有姿勢不同）
 - 畫面中寵物畫布為 64 x 68 邏輯像素，影格放在 y = 2，浮動動畫會上下移動 1~2 px
@@ -59,7 +59,7 @@
 
 ```jsonc
 "pet": {
-  "vaporeon": {               // 角色資料夾名稱
+  "ayame": {                  // 角色資料夾名稱
     "idle/idle_0": {
       "head_top": [32, 17],   // 頭頂 (64x64 影格內座標)
       "eyes":     [32, 30],   // 兩眼中心

@@ -3,7 +3,7 @@
 
 struct Settings {
   uint8_t costume = 0;
-  uint8_t character = 0;    // 角色 (0 水伊布，1 水晶燈火靈，2 達克萊伊，3 以後 = SD 卡角色；見 Characters)
+  uint8_t character = 0;    // 角色 (0 百鬼綾目 (內建)，1 以後 = SD 卡角色；見 Characters)
   bool sleepEnabled = true;
   uint8_t sleepStart = 23;  // 時 (0~23)
   uint8_t sleepEnd = 7;     // 時 (0~23)
@@ -29,8 +29,6 @@ struct Settings {
   uint8_t alarmMin = 0;
   uint8_t alarmDays = 0;    // 0 每天，1 平日 (週一~五)，2 週末
   uint8_t powerSave = 1;    // 省電：0 關，1 自動 (沒在充電時)，2 開
-  bool notifyOn = true;     // iPhone 通知同步 (藍牙 ANCS)
-  bool notifyDetail = true; // 通知顯示內容；false = 只顯示 App 名稱
   char ssid[33] = {0};
   char pass[65] = {0};
   char cwaKey[65] = {0};    // 中央氣象署 API 金鑰 (只存在 NVS)

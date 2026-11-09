@@ -26,11 +26,10 @@ constexpr uint8_t NAP_BRIGHTNESS_MIN = 8;  // 閒置小睡亮度下限 (設定�
 constexpr float TILT_ON_G = 0.35f;         // 約 20 度
 constexpr float TILT_OFF_G = 0.20f;
 
-constexpr uint8_t SETTING_ITEMS = 27;
+constexpr uint8_t SETTING_ITEMS = 25;
 constexpr uint32_t TAP_BLOCK_MS = 400;  // 按鍵前後這段時間不算拍頭
 constexpr uint32_t WALK_MAX_SEC = 30 * 60;  // 散步最久 30 分鐘就自己回家
 constexpr uint32_t WALK_MSG_MS = 3000;
-constexpr uint32_t NOTIFY_SHOW_MS = 8000;
 constexpr uint8_t SETTING_ROWS = 6;  // 一頁顯示幾項 (超過就捲動)
 const uint8_t NAP_OPTIONS[] = {0, 1, 3, 5, 10, 30};  // 分鐘，0 = 關閉
 const uint8_t FOCUS_OPTIONS[] = {25, 30, 45, 50, 60, 5, 10, 15, 20};  // 番茄鐘專注分鐘
@@ -107,9 +106,7 @@ void App::begin() {
   console_.begin(settings_, wifi_, clock_, costumes_, motion_, battery_, weather_);
   applyPowerMode();
   updateScene(now, true);
-  if (s.notifyOn) ancs_.begin("DeskPet");
   static App *self = this;
-  console_.setBleClear([]() { self->ancs_.clearBonds(); });
   console_.setExtra([](const char *cmd) { return self->consoleCommand(cmd); });
 
   enter(Screen::Main, now);
@@ -180,7 +177,7 @@ void App::loop() {
   }
 
   updateBattery(now);
-  updateNotify(now);
+  updatePopup(now);
   if (weather_.changed()) {
     applyWeatherToPet();
     updateScene(now, true);
@@ -329,8 +326,13 @@ void App::onShake(uint32_t now) {
   }
   if (petVisible()) {  // 醒著時搖一搖 = 開心
     pet_.play(AnimId::Happy, now);
-    if (random(100) < 50) sfx(Sfx::CryHappy, (int8_t)random(-6, 10));
-    else sfx(Sfx::Happy);
+    if (sound_.hasPatVoices()) {
+      if (!sound_.busy()) sfx(Sfx::CryHappy);  // 有語音的角色 (百鬼綾目)：說一句語音，上一句沒講完不插話
+    } else if (random(100) < 50) {
+      sfx(Sfx::CryHappy, (int8_t)random(-6, 10));
+    } else {
+      sfx(Sfx::Happy);
+    }
     diary_.add(DiaryStat::Shake);
   }
 }
@@ -595,7 +597,6 @@ void App::hourlyEvents(const tm &t, uint32_t now) {
       lastBirthdayDay_ != t.tm_yday && sleep_ == SleepKind::Awake) {
     lastBirthdayDay_ = t.tm_yday;
     showMessage(Str::MSG_BIRTHDAY, now, 15000);
-    if (s.soundOn) sound_.playSong(0);  // 生日：播生日快樂歌 (音效開啟時)
     pet_.play(AnimId::Happy, now);
   }
   if (t.tm_min != 0 || lastEventHour_ == t.tm_hour) return;
@@ -917,28 +918,23 @@ void App::changeSetting(uint8_t item, bool back) {
       if (!timer_.active()) timer_.configure(s.focusMin, s.breakMin);
       break;
     case 18:
-      s.notifyOn = !s.notifyOn;
-      ancs_.setEnabled(s.notifyOn);
-      break;
-    case 19: s.notifyDetail = !s.notifyDetail; break;
-    case 20:
       s.patLevel = step(s.patLevel, 0, 3, back);
       motion_.setPatLevel(s.patLevel);
       break;
-    case 21:
+    case 19:
       s.soundOn = !s.soundOn;
       sound_.setEnabled(s.soundOn);
       sfx(Sfx::Test);  // 開啟時試聽
       break;
-    case 22:
+    case 20:
       s.soundVol = step(s.soundVol, 0, 2, back);
       sound_.setVolume(s.soundVol);
       sfx(Sfx::Test);
       break;
-    case 23: s.alarmOn = !s.alarmOn; break;
-    case 24: s.alarmHour = step(s.alarmHour, 0, 23, back); break;
-    case 25: s.alarmMin = (uint8_t)((s.alarmMin / 5 * 5 + (back ? 55 : 5)) % 60); break;  // 每次 5 分
-    case 26: s.alarmDays = step(s.alarmDays, 0, 2, back); break;
+    case 21: s.alarmOn = !s.alarmOn; break;
+    case 22: s.alarmHour = step(s.alarmHour, 0, 23, back); break;
+    case 23: s.alarmMin = (uint8_t)((s.alarmMin / 5 * 5 + (back ? 55 : 5)) % 60); break;  // 每次 5 分
+    case 24: s.alarmDays = step(s.alarmDays, 0, 2, back); break;
     default: break;
   }
 }
@@ -998,15 +994,13 @@ void App::drawSettings() {
       case 15: label = Str::SET_SHAKE; text = Str::LEVELS[s.shakeLevel <= 2 ? s.shakeLevel : 1]; break;
       case 16: label = Str::SET_FOCUS; snprintf(value, sizeof(value), "%d%s", s.focusMin, Str::MINUTES); break;
       case 17: label = Str::SET_BREAK; snprintf(value, sizeof(value), "%d%s", s.breakMin, Str::MINUTES); break;
-      case 18: label = Str::SET_NOTIFY; toggle = s.notifyOn; break;
-      case 19: label = Str::SET_NOTIFY_DETAIL; text = s.notifyDetail ? Str::DETAIL_FULL : Str::DETAIL_HIDDEN; break;
-      case 20: label = Str::SET_PAT; text = Str::PAT_LEVELS[s.patLevel <= 3 ? s.patLevel : 2]; break;
-      case 21: label = Str::SET_SOUND; toggle = s.soundOn; break;
-      case 22: label = Str::SET_VOLUME; text = Str::LEVELS[s.soundVol <= 2 ? s.soundVol : 1]; break;
-      case 23: label = Str::SET_ALARM; toggle = s.alarmOn; break;
-      case 24: label = Str::SET_ALARM_H; snprintf(value, sizeof(value), "%02u", s.alarmHour); break;
-      case 25: label = Str::SET_ALARM_M; snprintf(value, sizeof(value), "%02u", s.alarmMin); break;
-      case 26: label = Str::SET_ALARM_DAYS; text = Str::ALARM_DAYS[s.alarmDays <= 2 ? s.alarmDays : 0]; break;
+      case 18: label = Str::SET_PAT; text = Str::PAT_LEVELS[s.patLevel <= 3 ? s.patLevel : 2]; break;
+      case 19: label = Str::SET_SOUND; toggle = s.soundOn; break;
+      case 20: label = Str::SET_VOLUME; text = Str::LEVELS[s.soundVol <= 2 ? s.soundVol : 1]; break;
+      case 21: label = Str::SET_ALARM; toggle = s.alarmOn; break;
+      case 22: label = Str::SET_ALARM_H; snprintf(value, sizeof(value), "%02u", s.alarmHour); break;
+      case 23: label = Str::SET_ALARM_M; snprintf(value, sizeof(value), "%02u", s.alarmMin); break;
+      case 24: label = Str::SET_ALARM_DAYS; text = Str::ALARM_DAYS[s.alarmDays <= 2 ? s.alarmDays : 0]; break;
       default: break;
     }
     if (text) snprintf(value, sizeof(value), "%s", text);
@@ -1040,8 +1034,8 @@ void App::drawSettings() {
 }
 
 uint8_t App::settingGroup(uint8_t item) {
-  // 0 睡眠、1 螢幕與電源、2 裝扮、3 背景與天氣、4 互動、5 番茄鐘、6 通知
-  static const uint8_t GROUP[SETTING_ITEMS] = {0, 0, 0, 1, 0, 1, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 5, 5, 6, 6, 4, 7, 7, 8, 8, 8, 8};
+  // 0 睡眠、1 螢幕與電源、2 裝扮、3 背景與天氣、4 互動、5 番茄鐘、6 聲音、7 鬧鐘
+  static const uint8_t GROUP[SETTING_ITEMS] = {0, 0, 0, 1, 0, 1, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 5, 5, 4, 6, 6, 7, 7, 7, 7};
   return item < SETTING_ITEMS ? GROUP[item] : 0;
 }
 
@@ -1266,7 +1260,6 @@ void App::webApply(const Settings &s, bool wifiChanged) {
   applyPowerMode();
   applyWeatherToPet();
   updateScene(now, true);
-  ancs_.setEnabled(s.notifyOn);
   if (wifiChanged) pendingWifiAt_ = now + 1500;
   if (screen_ == Screen::Settings) drawSettings();
 }
@@ -1277,74 +1270,9 @@ void App::webSetWifi(const char *ssid, const char *pass) {
 }
 
 // ------------------------------------------------------------
-// iPhone 通知 / 藍牙配對碼：在上方時間區彈出卡片
-void App::updateNotify(uint32_t now) {
-  ancs_.update(now);
-
-  // 配對碼：不管在哪個畫面都要立刻顯示 (iPhone 正在等你輸入)
-  uint32_t pk;
-  if (ancs_.passkey(pk)) {
-    if (popup_ != Popup::Passkey || pk != shownPasskey_) {
-      if (screen_ != Screen::Main) enter(Screen::Main, now);
-      wakeIfSleeping(now);
-      shownPasskey_ = pk;
-      popup_ = Popup::Passkey;
-      popupUntil_ = now + 60000;
-      Arduino_GFX &g = display_.gfx();
-      g.fillRect(0, 0, 240, PET_Y - 1, Theme::PANEL);
-      display_.utf8Centered(3, Str::PASSKEY_TITLE, 1, Theme::TEXT, Theme::PANEL);
-      char buf[8];
-      snprintf(buf, sizeof(buf), "%06lu", (unsigned long)pk);
-      display_.text((240 - 6 * 24) / 2, 22, buf, 4, Theme::TIME, Theme::PANEL);
-    }
-  } else if (popup_ == Popup::Passkey) {
-    closePopup();
-  }
-
-  // 配對完成
-  const AncsState st = ancs_.state();
-  if (st != lastAncs_) {
-    if (st == AncsState::Ready) showMessage(Str::PHONE_READY, now, 5000);
-    lastAncs_ = st;
-  }
-
-  // 新通知
-  PhoneNotification n;
-  while (ancs_.pop(n)) {
-    Serial.printf("[ANCS] %s: %s\n", n.app, settings_.get().notifyDetail ? n.title : "(hidden)");
-    diary_.add(DiaryStat::Notify);  // 日記只記則數，不記內容
-    if (sleep_ == SleepKind::Night) continue;  // 夜間睡眠不打擾
-    pendingNote_ = n;
-    hasPendingNote_ = true;
-    pendingNoteAt_ = now;
-  }
-  // 只在主畫面彈出；在其他畫面時先記著，回主畫面 60 秒內再顯示
-  if (hasPendingNote_ && popup_ != Popup::Passkey && popup_ != Popup::Alarm) {
-    if (now - pendingNoteAt_ > 60000) {
-      hasPendingNote_ = false;
-    } else if (screen_ == Screen::Main) {
-      hasPendingNote_ = false;
-      wakeIfSleeping(now);
-      showNotification(pendingNote_, now);
-    }
-  }
-
+// 上方彈出卡片 (鬧鐘)：時間到自動關閉
+void App::updatePopup(uint32_t now) {
   if (popup_ != Popup::None && (int32_t)(now - popupUntil_) >= 0) closePopup();
-}
-
-void App::showNotification(const PhoneNotification &n, uint32_t now) {
-  popup_ = Popup::Notify;
-  popupUntil_ = now + NOTIFY_SHOW_MS;
-  Arduino_GFX &g = display_.gfx();
-  g.fillRect(0, 0, 240, PET_Y - 1, Theme::PANEL);
-  char head[140];
-  const bool detail = settings_.get().notifyDetail;
-  if (detail && n.title[0]) snprintf(head, sizeof(head), "[%s] %s", n.app, n.title);
-  else snprintf(head, sizeof(head), "[%s] %s", n.app, detail ? "" : Str::NOTIFY_HIDDEN);
-  display_.utf8Wrap(6, 3, 228, head, 1, 1, Theme::TIME, Theme::PANEL);
-  sfx(Sfx::Notify);
-  if (detail && n.message[0]) display_.utf8Wrap(6, 19, 228, n.message, 1, 3, Theme::TEXT, Theme::PANEL);
-  pet_.play(AnimId::Happy, now);
 }
 
 void App::closePopup() {
@@ -1383,8 +1311,8 @@ void App::patPet(uint32_t now) {
   static uint8_t n = 0;
   constexpr uint8_t count = sizeof(Str::MSG_PAT) / sizeof(Str::MSG_PAT[0]);
   pet_.pat(now);
-  if (random(100) < 40) sfx(Sfx::CryHappy, (int8_t)random(-8, 12));  // 有時候會開心地叫
-  else sfx(Sfx::Pat);
+  // 摸頭只播 SD 卡的摸頭語音 (sound/<角色>/pat_N.wav)；沒有語音的角色摸頭不出聲
+  if (sound_.hasPatVoices() && !sound_.busy()) sfx(Sfx::Pat);  // 上一句還沒講完就不插話
   diary_.add(DiaryStat::Pet);
   if (screen_ == Screen::Walk) {
     walkMsg_ = Str::MSG_PAT[n++ % count];
@@ -1587,10 +1515,10 @@ bool App::consoleCommand(const char *cmd) {
     sound_.play(Sfx::Cry, true, (int8_t)random(-8, 10));
     return true;
   }
-  if (strncmp(cmd, "song ", 5) == 0) {  // song 0~3：播音樂盒曲目
+  if (strncmp(cmd, "song ", 5) == 0) {  // song n：播音樂盒曲目 (SD 卡歌曲)
     const int n = atoi(cmd + 5);
     if (n < 0 || n >= SoundManager::songCount()) {
-      Serial.println("song 0~3");
+      Serial.printf("song 0~%d (SD music/)\n", (int)SoundManager::songCount() - 1);
     } else {
       wakeIfSleeping(now);
       musicSong_ = (uint8_t)n;

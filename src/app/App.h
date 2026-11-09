@@ -8,7 +8,6 @@
 #include "../diary/Diary.h"
 #include "../display/DisplayManager.h"
 #include "../input/ButtonManager.h"
-#include "../notify/AncsClient.h"
 #include "../pet/Characters.h"
 #include "../pet/Pet.h"
 #include "../power/BatteryMonitor.h"
@@ -34,10 +33,8 @@ class App {
   void webApply(const Settings &s, bool wifiChanged);
   void webPokePet();
   void webSetWifi(const char *ssid, const char *pass);
-  void webUnpairPhone() { ancs_.clearBonds(); }
   void webStartWalk();
   const Diary &diary() const { return diary_; }
-  AncsState phoneState() const { return ancs_.state(); }
   const CostumeManager &costumes() const { return costumes_; }
   const BatteryMonitor &battery() const { return battery_; }
   WeatherInfo weather() const { return weather_.info(); }
@@ -126,9 +123,8 @@ class App {
   uint16_t drawCard(int16_t x, int16_t y, int16_t w, int16_t h, bool highlight);
   static uint8_t settingGroup(uint8_t item);
   bool consoleCommand(const char *cmd);
-  // 上方彈出卡片 (蓋住時間區)：iPhone 通知 / 藍牙配對碼
-  void updateNotify(uint32_t now);
-  void showNotification(const PhoneNotification &n, uint32_t now);
+  // 上方彈出卡片 (蓋住時間區)：鬧鐘
+  void updatePopup(uint32_t now);
   void closePopup();
   bool popupActive() const { return popup_ != Popup::None; }
 
@@ -146,7 +142,6 @@ class App {
   FocusTimer timer_;
   WebPanel web_;
   WeatherService weather_;
-  AncsClient ancs_;
   Diary diary_;
   SoundManager sound_;
   uint8_t menuItem_ = 0;
@@ -186,14 +181,9 @@ class App {
   uint32_t lastDiaryTick_ = 0;
   const char *walkMsg_ = nullptr;
   uint32_t walkMsgUntil_ = 0;
-  enum class Popup : uint8_t { None, Passkey, Notify, Alarm };
+  enum class Popup : uint8_t { None, Alarm };
   Popup popup_ = Popup::None;
   uint32_t popupUntil_ = 0;
-  uint32_t shownPasskey_ = 0;
-  AncsState lastAncs_ = AncsState::Off;
-  PhoneNotification pendingNote_;
-  bool hasPendingNote_ = false;
-  uint32_t pendingNoteAt_ = 0;
   Scene scene_;
   bool powerSaving_ = false;
   uint32_t lastSceneCheck_ = 0;

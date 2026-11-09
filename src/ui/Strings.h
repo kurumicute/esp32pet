@@ -12,7 +12,7 @@ constexpr const char *COSTUME_NAMES[] = {"原始", "蝴蝶結", "皇冠", "圓�
                                          "聖誕帽", "睡眠帽", "小披風", "星星眼"};
 
 // 角色名稱 (順序與 tools/png2c.py 的 CHARACTERS / PET_FRAMES 一致)
-constexpr const char *CHARACTER_NAMES[] = {"水伊布", "水晶燈火靈", "達克萊伊"};
+constexpr const char *CHARACTER_NAMES[] = {"百鬼綾目（袴）"};
 constexpr const char *CHARACTER_TITLE = "換角色";
 
 // 主畫面
@@ -29,8 +29,9 @@ constexpr const char *MSG_HOUR = "整點囉！";
 constexpr const char *MSG_BIRTHDAY = "生日快樂！";
 constexpr const char *MSG_LOW_BATTERY = "電量不足，請充電";
 constexpr const char *MSG_CHARGING = "充電中～";
-// 摸頭 (輪流顯示)
-constexpr const char *MSG_PAT[] = {"好舒服～", "嘿嘿，再摸一下", "最喜歡你了！", "呼嚕嚕～", "頭頂暖暖的"};
+// 摸頭 (輪流顯示；hololive 直播台風格。一行最多約 9 個全形字)
+constexpr const char *MSG_PAT[] = {"えへへ～被摸頭了", "謝謝老闆的摸摸！", "余は満足じゃ～", "摸摸也算スパチャ？",
+                                   "好き好き大好き！", "再摸要收會員費喔", "被摸到了ぺこ！", "おつかれさま～♪"};
 
 // 裝扮選單
 constexpr const char *COSTUME_TITLE = "換裝";
@@ -74,7 +75,7 @@ constexpr const char *DAY = "日";
 constexpr const char *BG_MODES[] = {"自動", "清晨", "白天", "黃昏", "夜晚"};
 constexpr const char *LEVELS[] = {"低", "中", "高"};
 // 設定分類 (順序與 App::settingGroup 一致)
-constexpr const char *SET_GROUPS[] = {"睡眠", "螢幕與電源", "裝扮", "背景與天氣", "互動", "番茄鐘", "通知", "聲音", "鬧鐘"};
+constexpr const char *SET_GROUPS[] = {"睡眠", "螢幕與電源", "裝扮", "背景與天氣", "互動", "番茄鐘", "聲音", "鬧鐘"};
 
 // 天氣縣市 (中央氣象署名稱，順序 = 設定編號)
 constexpr const char *COUNTIES[] = {
@@ -119,7 +120,7 @@ constexpr const char *DIARY_BUTTERFLY = "看到 %u 隻蝴蝶";
 constexpr const char *DIARY_PET = "被摸摸 %u 次，好開心～";
 constexpr const char *DIARY_SHAKE = "被搖來搖去 %u 次。";
 constexpr const char *DIARY_FOCUS = "陪你專注了 %u 輪，你好棒！";
-constexpr const char *DIARY_NOTIFY = "幫你看了 %u 則通知。";
+constexpr const char *DIARY_NOTIFY = "幫你看了 %u 則通知。";  // 舊日記用 (iPhone 通知功能已移除)
 constexpr const char *DIARY_NAP = "偷偷打了 %u 次盹。";
 constexpr const char *DIARY_DRESS = "換了 %u 次衣服，穿著%s。";
 constexpr const char *DIARY_WEAR = "今天穿著%s。";
@@ -134,15 +135,6 @@ constexpr const char *WEATHER_NAMES[] = {"--", "晴", "晴時多雲", "多雲", 
 constexpr const char *DEG_C = "°C";
 constexpr const char *RAIN_CHANCE = "降雨";
 constexpr const char *INFO_NO_WEATHER = "天氣：未設定金鑰";
-
-// iPhone 通知
-constexpr const char *SET_NOTIFY = "iPhone 通知";
-constexpr const char *SET_NOTIFY_DETAIL = "通知內容";
-constexpr const char *DETAIL_FULL = "完整";
-constexpr const char *DETAIL_HIDDEN = "隱藏";
-constexpr const char *PASSKEY_TITLE = "藍牙配對碼（在 iPhone 輸入）";
-constexpr const char *NOTIFY_HIDDEN = "有新通知";
-constexpr const char *PHONE_READY = "iPhone 已連線！";
 
 // Wi-Fi 設定熱點
 constexpr const char *AP_TITLE = "Wi-Fi 設定";
@@ -203,7 +195,7 @@ constexpr const char *KEY_AGAIN = "再玩";
 
 // 音樂盒 (傳統兒歌，順序與 SoundManager 的曲目一致)
 constexpr const char *MUSIC_TITLE = "音樂盒";
-constexpr const char *SONG_NAMES[] = {"生日快樂", "小星星", "兩隻老虎", "小蜜蜂"};
+constexpr const char *MUSIC_EMPTY = "SD 卡 music/ 沒有歌曲";
 constexpr const char *KEY_PREV_SONG = "‹ 上一首";
 constexpr const char *KEY_NEXT_SONG = "下一首 ›";
 constexpr const char *KEY_PLAY = "播放/停止";

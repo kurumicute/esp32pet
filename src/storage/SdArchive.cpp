@@ -24,8 +24,7 @@ const Field FIELDS[] = {
     F_U8("county", county),    F_U8("bgMode", bgMode),     F_B("wxFx", weatherFx),       F_B("tempMood", tempMood),
     F_B("hourly", hourlyFx),   F_B("tilt", tiltOn),        F_U8("shake", shakeLevel),    F_U8("pat", patLevel),
     F_B("sound", soundOn),     F_U8("vol", soundVol),      F_B("alOn", alarmOn),         F_U8("alH", alarmHour),
-    F_U8("alM", alarmMin),     F_U8("alD", alarmDays),     F_U8("pwrSave", powerSave),   F_B("notify", notifyOn),
-    F_B("notifyDtl", notifyDetail),
+    F_U8("alM", alarmMin),     F_U8("alD", alarmDays),     F_U8("pwrSave", powerSave),
 };
 #undef F_U8
 #undef F_B

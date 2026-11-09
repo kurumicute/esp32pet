@@ -136,7 +136,8 @@ const Note SFX_ALARM[] = {{1047, 130, 0, V_BELL, 100}, {1319, 130, 0, V_BELL, 10
                           {2093, 300, 0, V_BELL, 100}, R(120), {1568, 130, 0, V_BELL, 100},
                           {2093, 400, 0, V_BELL, 100}};
 
-// ---- 每個角色自己的叫聲 / 腳步聲 (順序與 PET_FRAMES 角色編號一致；第 0 個 = 上面的水伊布) ----
+// ---- 合成叫聲組 (voice) 的叫聲 / 腳步聲；voice 0 = 上面 SFX_TABLE 原本的小動物叫聲 ----
+// (原本是水伊布 / 燈火靈 / 達克萊伊三個內建角色的叫聲；角色已刪除，叫聲組留給 SD 卡角色用 --voice 選)
 // 水晶燈火靈：低沉、空心、慢慢搖晃的幽靈聲「嗚～嗡」，開心時加吊燈的叮叮聲；飄著走，腳步改成輕輕的「咻」
 #define VG(hz, ms, to) {hz, ms, to, V_GHOST, 100}
 const Note CHAND_CRY[] = {VG(440, 360, 620), VG(620, 300, 400)};
@@ -167,7 +168,7 @@ struct SfxDef {
   uint8_t count;
 };
 #define SFX(a) {a, (uint8_t)(sizeof(a) / sizeof(a[0]))}
-// 角色 1 以後的叫聲 / 腳步聲 (角色 0 水伊布用 SFX_TABLE 原本的)
+// voice 1 以後的叫聲 / 腳步聲 (voice 0 用 SFX_TABLE 原本的)
 const SfxDef CHAR_SFX[][CHAR_SFX_COUNT] = {
     {SFX(CHAND_CRY), SFX(CHAND_CRY_HAPPY), SFX(CHAND_CRY_SLEEPY), SFX(CHAND_STEP), SFX(CHAND_STEP_RAIN)},
     {SFX(DARK_CRY), SFX(DARK_CRY_HAPPY), SFX(DARK_CRY_SLEEPY), SFX(DARK_STEP), SFX(DARK_STEP_RAIN)},
@@ -183,38 +184,6 @@ const SfxDef SFX_TABLE[] = {SFX(SFX_PAT),       SFX(SFX_HAPPY),      SFX(SFX_NOT
                             SFX(SFX_HIT),       SFX(SFX_ALARM)};
 static_assert(sizeof(SFX_TABLE) / sizeof(SFX_TABLE[0]) == (size_t)Sfx::Count, "SFX_TABLE 與 Sfx 數量不一致");
 
-// ---- 音樂盒曲目 (傳統兒歌 / 公共領域旋律)。音高 = MIDI 編號 (0 = 休止)，長度單位 = 16 分音符 ----
-struct SongNote {
-  uint8_t midi;
-  uint8_t len;
-};
-const SongNote SONG_BIRTHDAY[] = {  // 生日快樂歌
-    {67, 3}, {67, 1}, {69, 4}, {67, 4}, {72, 4}, {71, 8}, {67, 3}, {67, 1}, {69, 4}, {67, 4}, {74, 4}, {72, 8},
-    {67, 3}, {67, 1}, {79, 4}, {76, 4}, {72, 4}, {71, 4}, {69, 8}, {77, 3}, {77, 1}, {76, 4}, {72, 4}, {74, 4},
-    {72, 8}};
-const SongNote SONG_TWINKLE[] = {  // 小星星
-    {60, 4}, {60, 4}, {67, 4}, {67, 4}, {69, 4}, {69, 4}, {67, 8}, {65, 4}, {65, 4}, {64, 4}, {64, 4},
-    {62, 4}, {62, 4}, {60, 8}, {67, 4}, {67, 4}, {65, 4}, {65, 4}, {64, 4}, {64, 4}, {62, 8}, {67, 4},
-    {67, 4}, {65, 4}, {65, 4}, {64, 4}, {64, 4}, {62, 8}, {60, 4}, {60, 4}, {67, 4}, {67, 4}, {69, 4},
-    {69, 4}, {67, 8}, {65, 4}, {65, 4}, {64, 4}, {64, 4}, {62, 4}, {62, 4}, {60, 8}};
-const SongNote SONG_TIGERS[] = {  // 兩隻老虎
-    {60, 4}, {62, 4}, {64, 4}, {60, 4}, {60, 4}, {62, 4}, {64, 4}, {60, 4}, {64, 4}, {65, 4}, {67, 8},
-    {64, 4}, {65, 4}, {67, 8}, {67, 2}, {69, 2}, {67, 2}, {65, 2}, {64, 4}, {60, 4}, {67, 2}, {69, 2},
-    {67, 2}, {65, 2}, {64, 4}, {60, 4}, {60, 4}, {55, 4}, {60, 8}, {60, 4}, {55, 4}, {60, 8}};
-const SongNote SONG_BEE[] = {  // 小蜜蜂
-    {67, 4}, {64, 4}, {64, 8}, {65, 4}, {62, 4}, {62, 8}, {60, 4}, {62, 4}, {64, 4}, {65, 4}, {67, 4},
-    {67, 4}, {67, 8}, {67, 4}, {64, 4}, {64, 8}, {65, 4}, {62, 4}, {62, 8}, {60, 4}, {64, 4}, {67, 4},
-    {67, 4}, {64, 16}, {62, 4}, {62, 4}, {62, 4}, {62, 4}, {62, 4}, {64, 4}, {65, 8}, {64, 4}, {64, 4},
-    {64, 4}, {64, 4}, {64, 4}, {65, 4}, {67, 8}, {67, 4}, {64, 4}, {64, 8}, {65, 4}, {62, 4}, {62, 8},
-    {60, 4}, {64, 4}, {67, 4}, {67, 4}, {60, 16}};
-struct SongDef {
-  const SongNote *notes;
-  uint8_t count;
-  uint16_t unitMs;  // 16 分音符的長度
-};
-#define SONG(a, unit) {a, (uint8_t)(sizeof(a) / sizeof(a[0])), unit}
-const SongDef SONGS[] = {SONG(SONG_BIRTHDAY, 115), SONG(SONG_TWINKLE, 95), SONG(SONG_TIGERS, 105),
-                         SONG(SONG_BEE, 80)};
 
 constexpr int FRAMES = 128;
 int16_t frameBuf[FRAMES * 2];  // 立體聲 (左右聲道相同)
@@ -247,6 +216,17 @@ struct Pcm {
   uint32_t n;
 };
 Pcm wavSfx[SLOTS][(size_t)Sfx::Count] = {};
+
+// 摸頭語音：/deskpet/sound/<角色資料夾>/pat_1.wav … pat_24.wav，摸頭時隨機挑一句 (不連續重複)。
+// 有這些檔案的角色，摸頭、搖一搖和各種叫聲都改播這些語音 (不再用合成的叫聲)。每句最長 6 秒，超過的淡出截掉
+constexpr uint8_t MAX_PAT_VOICES = 24;
+constexpr uint32_t MAX_VOICE_SAMPLES = RATE * 6;
+struct PatPool {
+  Pcm clip[MAX_PAT_VOICES];
+  uint8_t n;
+  uint8_t last;
+};
+PatPool *patPool[SLOTS] = {};  // PSRAM；同一個資料夾的角色共用同一份
 
 constexpr uint8_t MAX_SD_SONGS = 30;
 char (*sdSongPath)[96] = nullptr;  // PSRAM (loadSd 時配置)
@@ -306,7 +286,7 @@ uint32_t readMono(File &f, const WavInfo &w, int16_t *out, uint32_t maxSamples, 
 }
 
 // 整個短音效讀進 PSRAM (轉成 16kHz 單聲道)
-bool loadPcm(const char *path, Pcm &out) {
+bool loadPcm(const char *path, Pcm &out, uint32_t maxSamples = MAX_SFX_SAMPLES) {
   File f = SdStore::fs().open(path, FILE_READ);
   if (!f) return false;
   WavInfo w;
@@ -317,7 +297,8 @@ bool loadPcm(const char *path, Pcm &out) {
   }
   const uint32_t srcN = w.dataBytes / (2u * w.channels);
   uint32_t outN = (uint32_t)((uint64_t)srcN * RATE / w.rate);
-  if (outN > MAX_SFX_SAMPLES) outN = MAX_SFX_SAMPLES;
+  const bool cut = outN > maxSamples;
+  if (cut) outN = maxSamples;
   if (outN == 0) {
     f.close();
     return false;
@@ -343,6 +324,10 @@ bool loadPcm(const char *path, Pcm &out) {
     const float fr = pos - k;
     const int16_t a = k < got ? src[k] : 0, b = k + 1 < got ? src[k + 1] : a;
     dst[i] = (int16_t)(a + (b - a) * fr);
+  }
+  if (cut) {  // 被截掉的聲音：最後 0.15 秒淡出，避免「啪」一聲
+    const uint32_t fade = outN < RATE * 15 / 100 ? outN : RATE * 15 / 100;
+    for (uint32_t i = 0; i < fade; i++) dst[outN - 1 - i] = (int16_t)((int32_t)dst[outN - 1 - i] * (int32_t)i / (int32_t)fade);
   }
   heap_caps_free(src);
   out.s = dst;
@@ -502,9 +487,28 @@ void streamWav(const char *path) {
   f.close();
 }
 
+PatPool *patPoolFor(uint8_t slot) {
+  if (slot < SoundManager::MAX_SLOTS && patPool[slot] != nullptr) return patPool[slot];
+  return patPool[SLOTS - 1];  // 共用 (common)
+}
+
 void playSfx(uint8_t id, int8_t pitch, uint8_t voice, uint8_t slot) {
   if (id >= (uint8_t)Sfx::Count) return;
   const float pmul = 1.0f + pitch / 100.0f;
+  // 摸頭語音；有語音的角色，叫聲 (cry / cry_happy / cry_sleepy) 也改成隨機一句語音，
+  // 除非 SD 卡另外放了那個叫聲的專屬檔 (例如 sound/ayame/cry_sleepy.wav)。語音一律原音高播放
+  const bool isCry = id == (uint8_t)Sfx::Cry || id == (uint8_t)Sfx::CryHappy || id == (uint8_t)Sfx::CrySleepy;
+  const bool hasOwnFile = slot < SoundManager::MAX_SLOTS && wavSfx[slot][id].s != nullptr;
+  if (id == (uint8_t)Sfx::Pat || (isCry && !hasOwnFile)) {
+    PatPool *p = patPoolFor(slot);
+    if (p != nullptr && p->n > 0) {
+      uint8_t k = (uint8_t)random(p->n);
+      if (p->n > 1 && k == p->last) k = (uint8_t)((k + 1 + random(p->n - 1)) % p->n);
+      p->last = k;
+      playPcm(p->clip[k], 1.0f);
+      return;
+    }
+  }
   if (slot < SoundManager::MAX_SLOTS && wavSfx[slot][id].s != nullptr) {  // SD 卡：這個角色專屬
     playPcm(wavSfx[slot][id], pmul);
     return;
@@ -519,24 +523,9 @@ void playSfx(uint8_t id, int8_t pitch, uint8_t voice, uint8_t slot) {
   for (uint8_t i = 0; i < d.count && !abortPlay; i++) playNote(d.notes[i], mul);
 }
 
+// 音樂盒：只播 SD 卡 music/*.wav (串流)
 void playSongNotes(uint8_t id) {
-  constexpr uint8_t BUILTIN = sizeof(SONGS) / sizeof(SONGS[0]);
-  if (id >= BUILTIN) {
-    if ((uint8_t)(id - BUILTIN) < sdSongCount) streamWav(sdSongPath[id - BUILTIN]);
-    return;
-  }
-  const SongDef &song = SONGS[id];
-  for (uint8_t i = 0; i < song.count && !abortPlay; i++) {
-    const SongNote &sn = song.notes[i];
-    const uint16_t ms = sn.len * song.unitMs;
-    if (sn.midi == 0) {
-      writeSilence(ms);
-      continue;
-    }
-    const uint16_t hz = (uint16_t)(440.0f * powf(2.0f, (sn.midi - 69) / 12.0f));
-    const Note n = {hz, ms, 0, V_BELL, 100};
-    playNote(n, 1.0f);
-  }
+  if (id < sdSongCount) streamWav(sdSongPath[id]);
 }
 
 void soundTask(void *) {
@@ -663,7 +652,7 @@ void SoundManager::setStreaming(bool on) {
   }
 }
 
-uint8_t SoundManager::songCount() { return sizeof(SONGS) / sizeof(SONGS[0]) + sdSongCount; }
+uint8_t SoundManager::songCount() { return sdSongCount; }
 void SoundManager::reloadMusic() {
   if (!SdStore::ok()) return;
   stop();
@@ -681,17 +670,60 @@ void SoundManager::reloadMusic() {
 bool SoundManager::isSfxName(const char *stem) {
   for (const char *n : SFX_FILE)
     if (strcmp(n, stem) == 0) return true;
-  return false;
+  return isPatVoiceName(stem);
 }
 
-uint8_t SoundManager::builtinSongCount() { return sizeof(SONGS) / sizeof(SONGS[0]); }
+// pat_1 … pat_24 (摸頭語音)
+bool SoundManager::isPatVoiceName(const char *stem) {
+  if (strncmp(stem, "pat_", 4) != 0) return false;
+  const char *d = stem + 4;
+  if (d[0] < '1' || d[0] > '9') return false;  // 不收 pat_0、pat_01
+  if (d[1] == '\0') return true;
+  if (d[1] < '0' || d[1] > '9' || d[2] != '\0') return false;
+  return (d[0] - '0') * 10 + (d[1] - '0') <= MAX_PAT_VOICES;
+}
 
-const char *SoundManager::songName(uint8_t i) {
-  constexpr uint8_t BUILTIN = sizeof(SONGS) / sizeof(SONGS[0]);
-  static_assert(sizeof(Str::SONG_NAMES) / sizeof(Str::SONG_NAMES[0]) == BUILTIN, "SONG_NAMES 與 SONGS 數量不一致");
-  if (i < BUILTIN) return Str::SONG_NAMES[i];
-  i -= BUILTIN;
-  return i < sdSongCount ? sdSongName[i] : Str::SONG_NAMES[0];
+bool SoundManager::hasPatVoices() const { return patPoolFor(slot_) != nullptr; }
+
+
+const char *SoundManager::songName(uint8_t i) { return i < sdSongCount ? sdSongName[i] : ""; }
+
+// 讀一個角色資料夾的摸頭語音 (pat_N.wav)；資料夾跟前面的角色一樣時共用同一份 (省 PSRAM)
+uint16_t loadPatVoices(uint8_t slot, const char *dir, uint8_t charCount, const char *(*folder)(uint8_t)) {
+  if (slot < SoundManager::MAX_SLOTS) {
+    for (uint8_t o = 0; o < slot && o < charCount; o++) {
+      if (strcmp(folder(o), dir) == 0) {
+        patPool[slot] = patPool[o];
+        return 0;
+      }
+    }
+  }
+  char d[64];
+  snprintf(d, sizeof(d), "%s/sound/%s", SdStore::ROOT, dir);
+  char (*paths)[96] = allocLarge<char[96]>(MAX_PAT_VOICES + 24);
+  if (paths == nullptr) return 0;
+  const uint8_t n = SdStore::list(d, ".wav", paths, MAX_PAT_VOICES + 24);
+  PatPool *pool = nullptr;
+  for (uint8_t i = 0; i < n; i++) {
+    char stem[32];
+    SdStore::stem(paths[i], stem, sizeof(stem));
+    for (char *c = stem; *c; c++) *c = (char)tolower((unsigned char)*c);
+    if (!SoundManager::isPatVoiceName(stem)) continue;
+    if (pool == nullptr) {
+      pool = allocLarge<PatPool>(1);
+      if (pool == nullptr) break;
+      memset(pool, 0, sizeof(PatPool));
+    }
+    if (pool->n < MAX_PAT_VOICES && loadPcm(paths[i], pool->clip[pool->n], MAX_VOICE_SAMPLES)) pool->n++;
+  }
+  heap_caps_free(paths);
+  if (pool != nullptr && pool->n == 0) {
+    heap_caps_free(pool);
+    pool = nullptr;
+  }
+  patPool[slot] = pool;
+  if (pool != nullptr) Serial.printf("[SD] %s: %u pat voices\n", dir, (unsigned)pool->n);
+  return pool != nullptr ? pool->n : 0;
 }
 
 void SoundManager::loadSd(uint8_t charCount, const char *(*folder)(uint8_t)) {
@@ -705,6 +737,7 @@ void SoundManager::loadSd(uint8_t charCount, const char *(*folder)(uint8_t)) {
       snprintf(path, sizeof(path), "%s/sound/%s/%s.wav", SdStore::ROOT, dir, SFX_FILE[id]);
       if (SdStore::fs().exists(path) && loadPcm(path, wavSfx[slot][id])) loaded++;
     }
+    loaded += loadPatVoices(slot, dir, charCount, folder);
   }
   reloadMusic();
   Serial.printf("[SD] %u sound overrides, %u songs\n", (unsigned)loaded, (unsigned)sdSongCount);

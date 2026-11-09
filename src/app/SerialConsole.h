@@ -16,7 +16,6 @@ class SerialConsole {
   void begin(SettingsManager &s, WifiManager &w, ClockManager &c, CostumeManager &cos,
              const MotionSensor &m, const BatteryMonitor &b, WeatherService &ws);
   void update(uint32_t now);
-  void setBleClear(void (*fn)()) { bleClear_ = fn; }
   // 其他指令交給 App 處理 (walk / diary)；處理了回傳 true
   void setExtra(bool (*fn)(const char *)) { extra_ = fn; }
 
@@ -37,7 +36,6 @@ class SerialConsole {
   char line_[96];
   uint8_t len_ = 0;
   bool lastWasCR_ = false;
-  void (*bleClear_)() = nullptr;
   bool (*extra_)(const char *) = nullptr;
   char pendingSsid_[33];
 };

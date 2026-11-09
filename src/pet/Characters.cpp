@@ -129,8 +129,13 @@ const char *folder(uint8_t c) {
   return c < sdCount ? sdChars[c]->folder : PET_CHAR_IDS[0];
 }
 
+// 內建角色用哪一組合成叫聲 (順序同 PET_FRAMES)：百鬼綾目 = 3
+constexpr uint8_t BUILTIN_VOICE[] = {3};
+static_assert(sizeof(BUILTIN_VOICE) == PET_CHAR_COUNT, "BUILTIN_VOICE 與內建角色數量不一致");
+static_assert(BUILTIN_VOICE[0] < SoundManager::SYNTH_VOICES, "BUILTIN_VOICE 超出 SYNTH_VOICES");
+
 uint8_t synthVoice(uint8_t c) {
-  if (c < PET_CHAR_COUNT) return c;
+  if (c < PET_CHAR_COUNT) return BUILTIN_VOICE[c];
   c -= PET_CHAR_COUNT;
   return c < sdCount ? sdChars[c]->voice : 0;
 }

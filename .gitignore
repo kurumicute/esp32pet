@@ -2,3 +2,5 @@ build/
 sdcard/
 __pycache__/
 *.pyc
+sounds/
+song/

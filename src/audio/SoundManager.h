@@ -23,7 +23,7 @@ class SoundManager {
   void setEnabled(bool on);       // 「音效」開關 (自動音效)
   void setVolume(uint8_t level);  // 0 低，1 中，2 高
   static constexpr uint8_t MAX_SLOTS = 16;    // = Characters::MAX
-  static constexpr uint8_t SYNTH_VOICES = 4;  // 內建合成叫聲組數：0 水伊布 1 水晶燈火靈 2 達克萊伊 3 百鬼綾目
+  static constexpr uint8_t SYNTH_VOICES = 4;  // 內建合成叫聲組數：0 小動物 1 幽靈 2 暗影 3 女孩 (百鬼綾目)
   // 叫聲 / 腳步聲換成這個角色的：synthVoice = 內建合成聲組，slot = 角色編號 (SD 卡音效覆蓋)
   void setVoice(uint8_t synthVoice, uint8_t slot) {
     voice_ = synthVoice;
@@ -32,7 +32,9 @@ class SoundManager {
   // 開機讀 SD 卡：音效覆蓋 (sound/<folder(i)>/*.wav、sound/common/*.wav) 與音樂盒歌曲 (music/*.wav)
   void loadSd(uint8_t charCount, const char *(*folder)(uint8_t));
   void reloadMusic();                       // 網頁上傳 / 刪除歌曲後重新讀歌單 (會先停止播放)
-  static bool isSfxName(const char *stem);  // 是不是可以覆蓋的音效名稱 (cry、alarm…)
+  static bool isSfxName(const char *stem);  // 是不是可以覆蓋的音效名稱 (cry、alarm…、pat_1…pat_24)
+  static bool isPatVoiceName(const char *stem);  // pat_1 … pat_24 (摸頭語音)
+  bool hasPatVoices() const;  // 目前的角色有 SD 卡語音 (sound/<角色>/pat_N.wav)；摸頭、搖一搖、叫聲都用它
   // 播放；force = true 時即使「音效」關閉也播 (使用者主動開的功能)。pitch = 音高偏移 (百分比)
   void play(Sfx s, bool force = false, int8_t pitch = 0);
   void playSong(uint8_t song);  // 音樂盒 (一定會播)
@@ -43,8 +45,7 @@ class SoundManager {
   bool enabled() const { return enabled_; }
   bool ready() const { return hwReady_; }
 
-  static uint8_t songCount();         // 內建 + SD 卡
-  static uint8_t builtinSongCount();
+  static uint8_t songCount();         // SD 卡 music/*.wav 的數量 (沒有內建曲子)
   static const char *songName(uint8_t i);
 
  private:

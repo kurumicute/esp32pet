@@ -26,7 +26,7 @@ ANCHOR_IDS = {"head_top": 0, "eyes": 1, "neck": 2}
 
 # 角色 (assets/pets/<名稱>/)。順序 = 韌體裡的角色編號 (設定存的是編號，新角色請加在最後)
 # 角色名稱在 src/ui/Strings.h 的 Str::CHARACTER_NAMES，數量要一致
-CHARACTERS = ["vaporeon", "chandelure", "darkrai"]
+CHARACTERS = ["ayame"]
 
 # 韌體程式會引用的素材 (缺任何一個就報錯，避免編譯時才發現)
 # 每個角色都要有這些影格；順序 = PetFrameId (PF_xxx)
@@ -108,6 +108,7 @@ def main():
     cpp.append("const char *const PET_CHAR_IDS[PET_CHAR_COUNT] = {" + ", ".join(f'"{c}"' for c in CHARACTERS) + "};\n")
     hdr.append("")
     table = []
+    seen = {}  # 影格內容 → sprite 名稱 (貼圖角色 12 格幾乎都同一張，只存一份)
     for char in CHARACTERS:
         pet_anchors = anchors["pet"].get(char)
         if pet_anchors is None:
@@ -120,9 +121,13 @@ def main():
             if a is None:
                 sys.exit(f"anchors.json 缺少 {char} 影格 {name} 的對齊點")
             sym = f"PET_{ident(char)}_{ident(os.path.basename(name))}"
-            emit_sprite(cpp, sym + "_spr", *convert(path))
+            data = convert(path)
+            key = (data[0], data[1], tuple(data[2]), tuple(data[3]))
+            if key not in seen:
+                seen[key] = sym + "_spr"
+                emit_sprite(cpp, sym + "_spr", *data)
             cpp.append(
-                f"static const PetFrameAsset {sym} = {{&{sym}_spr, {{{{{a['head_top'][0]}, {a['head_top'][1]}}}, "
+                f"static const PetFrameAsset {sym} = {{&{seen[key]}, {{{{{a['head_top'][0]}, {a['head_top'][1]}}}, "
                 f"{{{a['eyes'][0]}, {a['eyes'][1]}}}, {{{a['neck'][0]}, {a['neck'][1]}}}}}, "
                 f"{'true' if a['eyes_open'] else 'false'}}};\n")
             row.append("&" + sym)

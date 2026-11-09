@@ -11,11 +11,14 @@
          所有動作都用同一張圖，只會上下微微浮動 (睡覺時往下沉 1 px)
   照片   python tools/sdcard.py photo <圖片...>
          裁成正方形、縮成 240x240 → deskpet/photos/<檔名>.565
-  音樂   python tools/sdcard.py music <xxx.wav...>
-         轉成 16kHz 單聲道 16-bit → deskpet/music/<檔名>.wav (檔名就是歌名，可以用中文)
+  音樂   python tools/sdcard.py music <xxx.wav / xxx.mp3...> [--as 歌名]
+         轉成 16kHz 單聲道 16-bit → deskpet/music/<檔名>.wav (檔名就是歌名，可以用中文 / 日文；mp3 要有 ffmpeg)
   音效   python tools/sdcard.py sound <xxx.wav> --as <名稱> [--char <角色資料夾>]
          覆蓋內建音效：名稱 = cry / cry_happy / cry_sleepy / step / step_rain / pat / happy / notify /
          timer / wake / flower / dress / hour / alarm …；不加 --char = 所有角色共用 (deskpet/sound/common/)
+  語音   python tools/sdcard.py voice <音檔...> --char <角色資料夾>
+         一組語音 (wav / mp3，mp3 要有 ffmpeg) → deskpet/sound/<角色>/pat_1.wav …；摸頭時隨機播一句
+         (去頭尾靜音、音量拉齊、每句最長 6 秒)
   上傳   python tools/sdcard.py push [--host 192.168.x.x] [檔名...]
          透過 Wi-Fi 把 sdcard/deskpet/ 裡的角色、照片、歌曲、音效傳到板子的 SD 卡 (不用拔卡)
          角色和歌曲馬上生效；音效要重新開機。韌體更新檔不能用這個方式上傳
@@ -118,8 +121,8 @@ def cut_background(im, tol=80):
     W, H = im.size
     px = im.load()
     bg = px[2, 2][:3]
-    if px[2, 2][3] < 128:  # 本來就是透明背景
-        return im
+    if px[2, 2][3] < 128:  # 本來就是透明背景：只裁掉四周空白
+        return im.crop(im.split()[3].point(lambda a: 255 if a >= 128 else 0).getbbox())
     seen = bytearray(W * H)
     q = deque([(x, 0) for x in range(W)] + [(x, H - 1) for x in range(W)] +
               [(0, y) for y in range(H)] + [(W - 1, y) for y in range(H)])
@@ -173,7 +176,7 @@ def cut_background(im, tol=80):
     return im.crop(im.getbbox())
 
 
-def sticker_frame(im, outline=(58, 36, 52), max_h=60, max_w=60, colors=48):
+def sticker_frame(im, outline=(58, 36, 52), max_h=60, max_w=60, colors=96):
     """縮成 64x64 影格 (腳底在 y=61)，加一圈深色外框；回傳 (影格, 錨點)"""
     w, h = im.size
     s = min(max_h / h, max_w / w)
@@ -238,19 +241,25 @@ def write_dpc(path, name, voice, frames):
     return len(out)
 
 
-def cmd_sticker(args):
-    im = cut_background(Image.open(args.image), args.tol)
+def sticker_frames(path, tol=80, head=None, eyes=None, neck=None):
+    """Q 版圖 → [(影格, 錨點)] x 12 (順序同 FRAMES)。tools/gen_draft_art.py 的內建角色也用這個"""
+    im = cut_background(Image.open(path), tol)
     frame, a = sticker_frame(im)
-    for key, v in (("head_top", args.head), ("eyes", args.eyes), ("neck", args.neck)):
+    for key, v in (("head_top", head), ("eyes", eyes), ("neck", neck)):
         if v is not None:  # 手動指定 (64x64 影格裡的 y)
             a[key] = [32, v]
-    print(f"裝扮對齊點 y：head={a['head_top'][1]} eyes={a['eyes'][1]} neck={a['neck'][1]}"
-          "（不準的話用 --head/--eyes/--neck 調整）")
+    print(f"{os.path.basename(path)} 裝扮對齊點 y：head={a['head_top'][1]} eyes={a['eyes'][1]} "
+          f"neck={a['neck'][1]}（不準的話用 --head/--eyes/--neck 調整）")
     sleep = Image.new("RGBA", (64, 64), (0, 0, 0, 0))  # 睡覺：往下沉 1 px
     sleep.paste(frame.crop((0, 0, 64, 63)), (0, 1))
     sa = dict(a, head_top=[a["head_top"][0], a["head_top"][1] + 1], eyes=[a["eyes"][0], a["eyes"][1] + 1],
               neck=[a["neck"][0], a["neck"][1] + 1])
-    frames = [((sleep, sa) if fr.startswith("sleep") else (frame, a)) for fr in FRAMES]
+    return [((sleep, sa) if fr.startswith("sleep") else (frame, a)) for fr in FRAMES]
+
+
+def cmd_sticker(args):
+    frames = sticker_frames(args.image, args.tol, args.head, args.eyes, args.neck)
+    frame = frames[0][0]
     folder = args.folder or os.path.splitext(os.path.basename(args.image))[0]
     dst = os.path.join(out_dir(args, "chars"), folder + ".dpc")
     n = write_dpc(dst, args.name or folder, args.voice | (0x80 if args.no_costume else 0), frames)  # 0x80 = 不疊裝扮
@@ -325,11 +334,16 @@ def write_wav(path, s):
 
 def cmd_music(args):
     d = out_dir(args, "music")
+    if args.as_ and len(args.files) != 1:
+        sys.exit("--as 只能搭配一個檔案")
     for p in args.files:
-        s, rate = read_wav_mono(p)
-        dst = os.path.join(d, os.path.splitext(os.path.basename(p))[0] + ".wav")
-        write_wav(dst, resample(s, rate))
-        print(f"音樂 → {dst}")
+        s = read_audio_mono(p)  # wav 或 mp3 (mp3 要有 ffmpeg)
+        name = args.as_ or os.path.splitext(os.path.basename(p))[0]
+        dst = os.path.join(d, name + ".wav")
+        if len((name + ".wav").encode("utf-8")) > 60:
+            sys.exit(f"歌名太長 (UTF-8 最多 56 bytes)，請用 --as 取短一點的名字：{name}")
+        write_wav(dst, s)
+        print(f"音樂 → {dst}  ({len(s) / RATE / 60:.1f} 分鐘，{os.path.getsize(dst) / 1e6:.1f} MB)")
 
 
 def cmd_sound(args):
@@ -343,6 +357,56 @@ def cmd_sound(args):
     dst = os.path.join(d, args.as_ + ".wav")
     write_wav(dst, s)
     print(f"音效 → {dst}")
+
+
+# ---------------- 摸頭語音 (一組音檔 → sound/<角色>/pat_1.wav …，摸頭時隨機播一句) ----------------
+def read_audio_mono(path):
+    """wav 直接讀；mp3 / m4a / ogg… 用 ffmpeg 轉成 16kHz 單聲道"""
+    if path.lower().endswith(".wav"):
+        s, rate = read_wav_mono(path)
+        return resample(s, rate)
+    import subprocess
+    try:
+        raw = subprocess.run(["ffmpeg", "-v", "error", "-i", path, "-ac", "1", "-ar", str(RATE), "-f", "s16le", "-"],
+                             check=True, capture_output=True).stdout
+    except FileNotFoundError:
+        sys.exit("轉換 mp3 需要 ffmpeg (請安裝並加入 PATH)，或先自己轉成 .wav")
+    except subprocess.CalledProcessError as e:
+        sys.exit(f"{path}: ffmpeg 轉換失敗：{e.stderr.decode('utf-8', 'replace')}")
+    a = array.array("h", raw)
+    if sys.byteorder != "little":
+        a.byteswap()
+    return list(a)
+
+
+def cmd_voice(args):
+    if not 1 <= len(args.files) <= 24:
+        sys.exit("摸頭語音最多 24 個檔案")
+    d = out_dir(args, "sound", args.char)
+    for n in os.listdir(d):  # 先清掉舊的 pat_N.wav，避免新舊混在一起
+        if n.lower().startswith("pat_") and n.lower().endswith(".wav"):
+            os.remove(os.path.join(d, n))
+    max_n = int(RATE * args.max)
+    fade = RATE * 15 // 100
+    for i, path in enumerate(args.files, 1):
+        s = read_audio_mono(path)
+        peak = max((abs(v) for v in s), default=0)
+        th = max(300, peak // 30)  # 去掉頭尾的靜音
+        a = next((k for k, v in enumerate(s) if abs(v) > th), 0)
+        b = len(s) - next((k for k, v in enumerate(reversed(s)) if abs(v) > th), 0)
+        s = s[max(0, a - RATE // 50):min(len(s), b + RATE // 10)]
+        note = ""
+        if len(s) > max_n:
+            note = f"（原本 {len(s) / RATE:.1f} 秒，截成 {args.max:g} 秒並淡出）"
+            s = s[:max_n]
+            for k in range(min(fade, len(s))):
+                s[-1 - k] = s[-1 - k] * k // fade
+        g = 29000 / peak if peak else 1.0  # 音量一致：峰值拉到約 -1 dB
+        s = [max(-32768, min(32767, int(v * g))) for v in s]
+        dst = os.path.join(d, f"pat_{i}.wav")
+        write_wav(dst, s)
+        print(f"pat_{i}.wav ← {os.path.basename(path)}  {len(s) / RATE:.1f} 秒{note}")
+    print(f"摸頭語音 {len(args.files)} 句 → {d}（push 上傳後要重新開機才生效）")
 
 
 # ---------------- 韌體 ----------------
@@ -432,12 +496,18 @@ def main():
     p.set_defaults(fn=cmd_photo)
     p = sp.add_parser("music")
     p.add_argument("files", nargs="+")
+    p.add_argument("--as", dest="as_", help="歌名 (= 檔名，只轉一個檔案時可用)")
     p.set_defaults(fn=cmd_music)
     p = sp.add_parser("sound")
     p.add_argument("file")
     p.add_argument("--as", dest="as_", required=True)
     p.add_argument("--char")
     p.set_defaults(fn=cmd_sound)
+    p = sp.add_parser("voice")
+    p.add_argument("files", nargs="+", help="音檔 (wav / mp3…，依序變成 pat_1、pat_2…)")
+    p.add_argument("--char", required=True, help="角色資料夾 (例如 ayame)")
+    p.add_argument("--max", type=float, default=6.0, help="每句最長幾秒 (預設 6，板子上限也是 6)")
+    p.set_defaults(fn=cmd_voice)
     p = sp.add_parser("push")
     p.add_argument("--host", default="deskpet.local", help="板子的 IP 或 deskpet.local")
     p.add_argument("only", nargs="*", help="只上傳這些檔名 (不填 = 全部)")
